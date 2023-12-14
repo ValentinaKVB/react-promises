@@ -5,38 +5,19 @@ import styles from './page.module.css'
 
 export default function Home() {
 
-  function load(url) {
-    return new Promise(function (resolve, reject) {
-      const request = new XMLHttpRequest();
-      request.onreadystatechange = function () {
-        if (this.readyState !== 4) {
-          return;
-        }
-        if (this.readyState === 4 && this.status == 200) {
-          resolve(this.response);
-
-        } else {
-          console.log(this.readyState);
-          reject(this.status);
-        }
-      };
-      request.open('GET', url, true);
-      request.send();
-    });
-  }
-
   const url = '/aldis/promiseTest';
   const [msg, setMsg] = useState('');
 
   function handleClick() {
-    load(url)
+    fetch(url)
       .then((response) => {
-        const result = JSON.parse(response);
-        setMsg(result.message);
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
       })
-      .catch((error) => {
-        setMsg(`Error getting the message, HTTP status: ${error}`);
-      });
+      .then((data) => setMsg(data.message))
+      .catch((error) => setMsg(error.message));
   }
 
   return (
