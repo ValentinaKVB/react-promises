@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from 'react';
+import { useState } from 'react';
 import styles from './page.module.css'
 
 export default function Home() {
@@ -9,9 +9,14 @@ export default function Home() {
     return new Promise(function (resolve, reject) {
       const request = new XMLHttpRequest();
       request.onreadystatechange = function () {
+        if (this.readyState !== 4) {
+          return;
+        }
         if (this.readyState === 4 && this.status == 200) {
           resolve(this.response);
+
         } else {
+          console.log(this.readyState);
           reject(this.status);
         }
       };
@@ -21,23 +26,23 @@ export default function Home() {
   }
 
   const url = '/aldis/promiseTest';
-  const msgRef = useRef(null);
+  const [msg, setMsg] = useState('');
 
   function handleClick() {
     load(url)
-    .then((response) => {
-      const result = JSON.parse(response);
-      msgRef.current.textContent = result.message;
-    })
-    .catch((error) => {
-      msgRef.current.textContent = `Error getting the message, HTTP status: ${error}`;
-    });
+      .then((response) => {
+        const result = JSON.parse(response);
+        setMsg(result.message);
+      })
+      .catch((error) => {
+        setMsg(`Error getting the message, HTTP status: ${error}`);
+      });
   }
 
   return (
     <div className={styles.content}>
       <div className={styles.container}>
-        <div className={styles.message} ref={msgRef}></div>
+        <div className={styles.message}>{msg}</div>
         <button className={styles.btnGet} onClick={handleClick}>Get Message</button>
       </div>
     </div>
